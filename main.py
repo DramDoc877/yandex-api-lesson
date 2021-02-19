@@ -44,7 +44,6 @@ class Application(QWidget):
 
     def keyPressEvent(self, event):
         global MAP_SCALE
-        print(str(event.key()))
         if str(event.key()) == "16777239":
             MAP_SCALE -= 1
         elif str(event.key()) == "16777238":
