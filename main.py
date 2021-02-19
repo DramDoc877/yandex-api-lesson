@@ -51,17 +51,6 @@ class Application(QWidget):
             self.image.setPixmap(self.pixMap)
             os.remove("map_image.png")
 
-    def keyPressEvent(self, event):
-        global MAP_SCALE
-        print(str(event.key()))
-        if str(event.key()) == "16777239":
-            if MAP_SCALE > 0:
-                MAP_SCALE -= 1
-        elif str(event.key()) == "16777238":
-            if MAP_SCALE < 17:
-                MAP_SCALE += 1
-        self.update_map()
-
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
