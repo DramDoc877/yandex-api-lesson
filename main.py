@@ -30,6 +30,16 @@ class Application(QWidget):
         self.hLayout.addWidget(self.line_y)
         self.layout.addWidget(self.image)
 
+    def keyPressEvent(self, event):
+        global MAP_SCALE
+        if str(event.key()) == "16777239":
+            if MAP_SCALE > 0:
+                MAP_SCALE -= 1
+        elif str(event.key()) == "16777238":
+            if MAP_SCALE < 17:
+                MAP_SCALE += 1
+        self.update_map()
+
     def update_map(self):
         response = requests.get(f"https://static-maps.yandex.ru/1.x/?ll={self.line_x.text()},{self.line_y.text()}&l=map&z={MAP_SCALE}")
         if response:
