@@ -1,40 +1,59 @@
-import sys
-from io import BytesIO
 import requests
-from PIL import Image
+import sys
+from PyQt5.Qt import *
+import os
 
-toponym_to_find = " ".join(sys.argv[1:])
+MAP_SCALE = 11
 
-geocoder_api_server = "http://geocode-maps.yandex.ru/1.x/"
 
-geocoder_params = {
-    "apikey": "40d1649f-0493-4b70-98ba-98533de7710b",
-    "geocode": toponym_to_find,
-    "format": "json"}
+class Application(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.layout = QVBoxLayout(self)
+        self.hLayout = QHBoxLayout(self)
+        self.btn_getimage = QPushButton(self)
+        self.line_x = QLineEdit(self)
+        self.line_y = QLineEdit(self)
+        self.image = QLabel(self)
+        self.setWindowTitle('Yandex Api')
+        self.setFixedSize(600, 600)
+        self.pixMap = QPixmap("temp/map_image.png")
 
-response = requests.get(geocoder_api_server, params=geocoder_params)
+        self.btn_getimage.clicked.connect(self.update_map)
 
-if not response:
-    pass
+        self.initUi()
 
-json_response = response.json()
-toponym = json_response["response"]["GeoObjectCollection"][
-    "featureMember"][0]["GeoObject"]
-toponym_coodrinates = toponym["Point"]["pos"]
-toponym_longitude, toponym_lattitude = toponym_coodrinates.split(" ")
+    def initUi(self):
+        self.btn_getimage.setText("Получить карту")
+        self.layout.addLayout(self.hLayout)
+        self.hLayout.addWidget(self.btn_getimage)
+        self.hLayout.addWidget(self.line_x)
+        self.hLayout.addWidget(self.line_y)
+        self.layout.addWidget(self.image)
 
-delta = "0.005"
+    def update_map(self):
+        response = requests.get(
+            f"https://static-maps.yandex.ru/1.x/?ll={self.line_x.text()},{self.line_y.text()}&l=map&z={MAP_SCALE}")
+        if response:
+            with open("map_image.png", 'wb') as image:
+                image.write(response.content)
+            self.pixMap = QPixmap("map_image.png")
+            self.pixMap = self.pixMap.scaledToWidth(600, Qt.SmoothTransformation)
+            self.image.setPixmap(self.pixMap)
+            os.remove("map_image.png")
 
-map_params = {
-    "ll": ",".join([toponym_longitude, toponym_lattitude]),
-    "spn": ",".join([delta, delta]),
-    "l": "map"
-}
+    def keyPressEvent(self, event):
+        global MAP_SCALE
+        print(str(event.key()))
+        if str(event.key()) == "16777239":
+            MAP_SCALE -= 1
+        elif str(event.key()) == "16777238":
+            MAP_SCALE += 1
+        self.update_map()
 
-map_api_server = "http://static-maps.yandex.ru/1.x/"
-response = requests.get(map_api_server, params=map_params)
 
-im = Image.open(BytesIO(
-    response.content))
-im.show()
-im.save("map.png")
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    fc = Application()
+    fc.show()
+    sys.exit(app.exec())
