@@ -55,7 +55,7 @@ class Application(QWidget):
         global MAP_SCALE
         print(str(event.key()))
         if str(event.key()) == "16777239":
-            if MAP_SCALE > 1:
+            if MAP_SCALE > 0:
                 MAP_SCALE -= 1
         elif str(event.key()) == "16777238":
             if MAP_SCALE < 17:
