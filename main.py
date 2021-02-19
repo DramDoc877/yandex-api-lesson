@@ -3,7 +3,8 @@ import sys
 from PyQt5.Qt import *
 import os
 
-MAP_SCALE = 11
+MAP_SCALE, x, y = 11, 0, 0
+
 
 class Application(QWidget):
     def __init__(self):
@@ -19,7 +20,6 @@ class Application(QWidget):
         self.pixMap = QPixmap("temp/map_image.png")
 
         self.btn_getimage.clicked.connect(self.update_map)
-
         self.initUi()
 
     def initUi(self):
@@ -31,7 +31,8 @@ class Application(QWidget):
         self.layout.addWidget(self.image)
 
     def update_map(self):
-        response = requests.get(f"https://static-maps.yandex.ru/1.x/?ll={self.line_x.text()},{self.line_y.text()}&l=map&z={MAP_SCALE}")
+        response = requests.get(
+            f"https://static-maps.yandex.ru/1.x/?ll={self.line_x.text()},{self.line_y.text()}&l=map&z={MAP_SCALE}")
         if response:
             with open("map_image.png", 'wb') as image:
                 image.write(response.content)
@@ -39,6 +40,17 @@ class Application(QWidget):
             self.pixMap = self.pixMap.scaledToWidth(600, Qt.SmoothTransformation)
             self.image.setPixmap(self.pixMap)
             os.remove("map_image.png")
+
+    def keyPressEvent(self, event):
+        global MAP_SCALE
+        print(str(event.key()))
+        if str(event.key()) == "16777239":
+            if MAP_SCALE > 1:
+                MAP_SCALE -= 1
+        elif str(event.key()) == "16777238":
+            if MAP_SCALE < 17:
+                MAP_SCALE += 1
+        self.update_map()
 
 
 if __name__ == '__main__':
